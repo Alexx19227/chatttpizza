@@ -3,208 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PizzaChat Ultra Dark</title>
+    <title>PizzaChat Ultra Pro</title>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         :root {
-            --bg-dark: #0b141a;
-            --panel-bg: rgba(32, 44, 51, 0.85);
-            --header-bg: #202c33;
-            --message-out: #005c4b;
-            --message-in: #202c33;
-            --accent-green: #00a884;
-            --accent-hover: #02c39a;
-            --text-primary: #e9edef;
-            --text-secondary: #8696a0;
-            --input-bg: #2a3942;
+            --bg-dark: #070a0f;
+            --panel-bg: rgba(15, 23, 36, 0.75);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            
+            --primary: #00e676;
+            --primary-hover: #00c853;
+            --primary-glow: rgba(0, 230, 118, 0.4);
+            
+            --msg-out: linear-gradient(135deg, #005c4b 0%, #004739 100%);
+            --msg-in: rgba(23, 32, 45, 0.9);
+            
+            --text-main: #f1f5f9;
+            --text-muted: #64748b;
+            
+            --check-gray: #94a3b8;
+            --check-blue: #38bdf8;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background-color: var(--bg-dark);
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            color: var(--text-primary);
+            color: var(--text-main);
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(0, 230, 118, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(56, 189, 248, 0.08) 0%, transparent 40%);
         }
 
-        .chat-container {
+        /* CONTAINER PRINCIPALE GLASSMORPHISM */
+        .chat-app {
             width: 100%;
-            max-width: 480px;
+            max-width: 440px;
             height: 92vh;
-            background-color: var(--bg-dark);
+            background: var(--panel-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 28px;
+            border: 1px solid var(--panel-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             display: flex;
             flex-direction: column;
-            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
         }
 
-        /* Header Principale */
+        /* HEADER DETTAGLIATO */
         .chat-header {
-            background-color: var(--header-bg);
-            padding: 14px 18px;
+            padding: 16px 20px;
+            background: rgba(10, 15, 24, 0.8);
+            border-bottom: 1px solid var(--panel-border);
             display: flex;
             align-items: center;
             gap: 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 10;
         }
 
-        .avatar-room {
-            width: 46px;
-            height: 46px;
-            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-            border-radius: 50%;
+        .avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #ff4b2b, #ff416c);
+            border-radius: 14px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 8px 16px rgba(255, 75, 43, 0.3);
+            position: relative;
         }
 
-        .chat-info h2 {
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            border: 2px solid var(--bg-dark);
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        .header-info h1 {
             font-size: 16px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
         }
 
-        .chat-info p {
-            font-size: 13px;
-            color: var(--accent-green);
+        .header-info p {
+            font-size: 12px;
+            color: var(--primary);
             font-weight: 500;
         }
 
-        /* Barra Configurazione Stanza & Profilo */
-        .control-bar {
-            background-color: var(--panel-bg);
-            backdrop-filter: blur(8px);
+        /* CONTROLLI STANZA E UTENTE */
+        .room-bar {
             padding: 10px 14px;
+            background: rgba(7, 10, 15, 0.5);
+            border-bottom: 1px solid var(--panel-border);
             display: flex;
             gap: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            z-index: 5;
         }
 
-        .control-bar input {
-            background-color: var(--input-bg);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: var(--text-primary);
-            padding: 9px 14px;
-            border-radius: 20px;
-            font-size: 13px;
+        .styled-input {
+            background: rgba(15, 23, 36, 0.8);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 12px;
             outline: none;
             transition: all 0.2s ease;
         }
 
-        .control-bar input:focus {
-            border-color: var(--accent-green);
-            box-shadow: 0 0 8px rgba(0, 168, 132, 0.3);
+        .styled-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px var(--primary-glow);
         }
 
-        #usernameInput { width: 38%; }
+        #usernameInput { width: 35%; }
         #roomInput { flex: 1; }
 
-        .btn-stylish {
-            background: linear-gradient(135deg, var(--accent-green), #008f6f);
-            color: #fff;
+        /* PULSANTE ENTRA ANIMATO */
+        .btn-action {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #03120a;
             border: none;
-            padding: 9px 16px;
-            border-radius: 20px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            box-shadow: 0 4px 10px rgba(0, 168, 132, 0.25);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px var(--primary-glow);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-stylish:hover {
-            background: linear-gradient(135deg, var(--accent-hover), var(--accent-green));
-            transform: translateY(-1px);
-            box-shadow: 0 6px 14px rgba(0, 168, 132, 0.35);
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--primary-glow);
+            filter: brightness(1.1);
         }
 
-        .btn-stylish:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 6px rgba(0, 168, 132, 0.2);
+        .btn-action:active {
+            transform: translateY(0) scale(0.95);
         }
 
-        /* Area Messaggi */
-        .chat-messages {
+        /* AREA MESSAGGI */
+        .messages-area {
             flex: 1;
-            padding: 18px;
+            padding: 16px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            background-color: #081015;
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(0, 168, 132, 0.05) 0%, transparent 60%),
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3Ccircle cx='30' cy='30' r='3'/%3E%3Ccircle cx='10' cy='20' r='2'/%3E%3Ccircle cx='50' cy='20' r='2'/%3E%3Ccircle cx='10' cy='50' r='2'/%3E%3Ccircle cx='50' cy='50' r='2'/%3E%3C/g%3E%3C/svg%3E");
-            background-size: cover, 60px 60px;
+            gap: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--panel-border) transparent;
         }
 
-        /* Bubble Messaggi */
-        .message {
-            max-width: 78%;
-            padding: 9px 13px;
-            border-radius: 12px;
-            font-size: 14.5px;
+        /* ANIMAZIONE INGRESSO MESSAGGI */
+        @keyframes msgSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .msg-bubble {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 13.5px;
             line-height: 1.4;
             position: relative;
-            animation: fadeIn 0.2s cubic-bezier(0.1, 1, 0.1, 1);
+            animation: msgSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             word-wrap: break-word;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .message.sent {
-            background: linear-gradient(135deg, #005c4b, #004d3f);
+        .msg-bubble.sent {
             align-self: flex-end;
-            border-top-right-radius: 2px;
+            background: var(--msg-out);
+            border-bottom-right-radius: 4px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .message.received {
-            background-color: var(--message-in);
+        .msg-bubble.received {
             align-self: flex-start;
-            border-top-left-radius: 2px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--msg-in);
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--panel-border);
         }
 
-        .message.system {
-            background: rgba(24, 34, 41, 0.9);
-            color: var(--text-secondary);
+        .msg-bubble.system {
             align-self: center;
-            font-size: 12px;
-            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-size: 11px;
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            margin: 8px 0;
-            backdrop-filter: blur(4px);
+            padding: 4px 12px;
         }
 
-        .sender-name {
-            font-weight: 600;
-            font-size: 12px;
-            color: #53bdeb;
+        .sender-tag {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--check-blue);
             margin-bottom: 2px;
         }
 
-        .meta-container {
+        .msg-meta {
             display: inline-flex;
             align-items: center;
             float: right;
@@ -213,99 +239,106 @@
             gap: 4px;
         }
 
-        .timestamp {
-            font-size: 11px;
-            color: var(--text-secondary);
+        .time-text {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
         }
 
-        .check-icon {
-            font-size: 13px;
-            color: #53bdeb;
-            line-height: 1;
+        .check-mark {
+            font-size: 12px;
+            font-weight: bold;
+            transition: color 0.2s ease, transform 0.2s ease;
         }
 
-        /* Area Input Bottom */
-        .chat-input {
-            background-color: var(--header-bg);
+        .check-mark.sent { color: var(--check-gray); }
+        .check-mark.delivered { color: var(--check-gray); }
+        .check-mark.read { 
+            color: var(--check-blue); 
+            transform: scale(1.1);
+        }
+
+        /* INPUT INFERIORE E PULSANTE INVIO ANIMATO */
+        .input-bar {
             padding: 12px 16px;
+            background: rgba(10, 15, 24, 0.8);
+            border-top: 1px solid var(--panel-border);
             display: flex;
             align-items: center;
-            gap: 12px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            gap: 10px;
         }
 
-        .chat-input input {
+        .input-bar input {
             flex: 1;
-            background-color: var(--input-bg);
-            border: 1px solid transparent;
-            color: var(--text-primary);
+            background: rgba(15, 23, 36, 0.8);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
             padding: 12px 18px;
-            border-radius: 24px;
+            border-radius: 20px;
+            font-size: 13.5px;
             outline: none;
-            font-size: 14.5px;
             transition: all 0.2s ease;
         }
 
-        .chat-input input:focus {
-            border-color: rgba(0, 168, 132, 0.5);
+        .input-bar input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
         }
 
         .send-btn {
-            background: linear-gradient(135deg, var(--accent-green), #008f6f);
-            color: #fff;
-            border: none;
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            border: none;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 168, 132, 0.3);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px var(--primary-glow);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
         }
 
         .send-btn:hover {
-            transform: scale(1.06);
-            box-shadow: 0 6px 16px rgba(0, 168, 132, 0.45);
+            transform: scale(1.08) rotate(-6deg);
+            box-shadow: 0 6px 18px var(--primary-glow);
         }
 
         .send-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.92) rotate(0deg);
         }
 
         .send-btn svg {
-            width: 20px;
-            height: 20px;
-            fill: #ffffff;
-            transform: translateX(2px);
+            width: 18px;
+            height: 18px;
+            fill: #03120a;
+            transform: translateX(1px);
         }
     </style>
 </head>
 <body>
 
-    <div class="chat-container">
-        <!-- Header -->
+    <div class="chat-app">
         <div class="chat-header">
-            <div class="avatar-room">🍕</div>
-            <div class="chat-info">
-                <h2>PizzaChat Room</h2>
-                <p id="currentRoomText">Stanza: stanza1</p>
+            <div class="avatar">
+                🍕
+                <div class="status-dot"></div>
+            </div>
+            <div class="header-info">
+                <h1>PizzaChat Ultra</h1>
+                <p id="roomStatus">Stanza: stanza1</p>
             </div>
         </div>
 
-        <!-- Barra impostazioni utente / stanza -->
-        <div class="control-bar">
-            <input type="text" id="usernameInput" placeholder="Tuo Nome..." value="Utente1">
-            <input type="text" id="roomInput" placeholder="Nome Stanza..." value="stanza1">
-            <button class="btn-stylish" onclick="changeRoom()">Entra</button>
+        <div class="room-bar">
+            <input type="text" id="usernameInput" class="styled-input" placeholder="Nickname" value="Utente1">
+            <input type="text" id="roomInput" class="styled-input" placeholder="Stanza" value="stanza1">
+            <button class="btn-action" onclick="changeRoom()">Entra</button>
         </div>
 
-        <!-- Messaggi -->
-        <div class="chat-messages" id="messages"></div>
+        <div class="messages-area" id="messages"></div>
 
-        <!-- Input Messaggio -->
-        <div class="chat-input">
+        <div class="input-bar">
             <input type="text" id="userInput" placeholder="Scrivi un messaggio..." onkeypress="handleKeyPress(event)">
             <button class="send-btn" onclick="sendMessage()">
                 <svg viewBox="0 0 24 24">
@@ -323,7 +356,6 @@
             changeRoom();
         });
 
-        // Gestione messaggi isolata per ogni utente
         socket.on("receive_message", (data) => {
             const currentUsername = document.getElementById("usernameInput").value.trim();
             
@@ -331,7 +363,25 @@
                 appendSystemMessage(data.message);
             } else {
                 const isMe = data.username === currentUsername;
-                appendMessage(data.username, data.message, data.time, isMe);
+                appendMessage(data.msg_id, data.username, data.message, data.time, isMe);
+                
+                if (!isMe) {
+                    socket.emit("confirm_delivery", { msg_id: data.msg_id, room: currentRoom });
+                    socket.emit("confirm_read", { msg_id: data.msg_id, room: currentRoom });
+                }
+            }
+        });
+
+        socket.on("update_status", (data) => {
+            const checkElement = document.getElementById(`check-${data.msg_id}`);
+            if (!checkElement) return;
+
+            if (data.status === "delivered") {
+                checkElement.textContent = "✓✓";
+                checkElement.className = "check-mark delivered";
+            } else if (data.status === "read") {
+                checkElement.textContent = "✓✓";
+                checkElement.className = "check-mark read";
             }
         });
 
@@ -342,7 +392,7 @@
             if (!roomInput) return;
 
             currentRoom = roomInput;
-            document.getElementById("currentRoomText").textContent = `Stanza: ${currentRoom}`;
+            document.getElementById("roomStatus").textContent = `Stanza: ${currentRoom}`;
             document.getElementById("messages").innerHTML = "";
 
             socket.emit("join_room", { username: username, room: currentRoom });
@@ -355,7 +405,10 @@
 
             if (!message) return;
 
+            const msg_id = "msg_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4);
+
             socket.emit("send_message", {
+                msg_id: msg_id,
                 username: username,
                 message: message,
                 room: currentRoom
@@ -364,14 +417,14 @@
             userInput.value = "";
         }
 
-        function appendMessage(sender, text, time, isMe) {
+        function appendMessage(msgId, sender, text, time, isMe) {
             const container = document.getElementById("messages");
             const msgDiv = document.createElement("div");
-            msgDiv.className = `message ${isMe ? "sent" : "received"}`;
+            msgDiv.className = `msg-bubble ${isMe ? "sent" : "received"}`;
 
             if (!isMe) {
                 const nameDiv = document.createElement("div");
-                nameDiv.className = "sender-name";
+                nameDiv.className = "sender-tag";
                 nameDiv.textContent = sender;
                 msgDiv.appendChild(nameDiv);
             }
@@ -380,17 +433,18 @@
             msgDiv.appendChild(textNode);
 
             const metaDiv = document.createElement("div");
-            metaDiv.className = "meta-container";
+            metaDiv.className = "msg-meta";
 
             const timeSpan = document.createElement("span");
-            timeSpan.className = "timestamp";
+            timeSpan.className = "time-text";
             timeSpan.textContent = time;
             metaDiv.appendChild(timeSpan);
 
             if (isMe) {
                 const checkSpan = document.createElement("span");
-                checkSpan.className = "check-icon";
-                checkSpan.innerHTML = "✓✓";
+                checkSpan.id = `check-${msgId}`;
+                checkSpan.className = "check-mark sent";
+                checkSpan.textContent = "✓";
                 metaDiv.appendChild(checkSpan);
             }
 
@@ -402,7 +456,7 @@
         function appendSystemMessage(text) {
             const container = document.getElementById("messages");
             const msgDiv = document.createElement("div");
-            msgDiv.className = "message system";
+            msgDiv.className = "msg-bubble system";
             msgDiv.textContent = text;
             container.appendChild(msgDiv);
             container.scrollTop = container.scrollHeight;
@@ -412,6 +466,5 @@
             if (e.key === "Enter") sendMessage();
         }
     </script>
-
 </body>
 </html>
